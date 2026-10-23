@@ -1,3 +1,11 @@
-output "public_ip" {
-  value = google_compute_instance.blog.network_interface[0].access_config.0.nat_ip
+output "qa_ip" {
+  value = module.qa.public_ip
+}
+
+output "staging_ip" {
+  value = module.staging.public_ip
+}
+
+output "prod_ip" {
+  value = module.prod.public_ip
 }
