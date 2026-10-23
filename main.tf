@@ -1,60 +1,29 @@
-module "app_network" {
-  source  = "terraform-google-modules/network/google"
-  version = "18.3.1"
+module "qa" {
+  source = "./modules/blog"
 
-  network_name = "${var.network_name}-network"
-  project_id   = var.project_id
+  project_id = var.project_id
+  region     = var.region
 
-  subnets = [
-    {
-      subnet_name   = "${var.network_name}-subnet0"
-      subnet_ip     = var.network_ip_range
-      subnet_region = var.region
-    }
-  ]
-
-  ingress_rules = [
-    {
-      name          = "${var.network_name}-web"
-      description   = "Inbound web"
-    
-      source_ranges = ["0.0.0.0/0"]
-      target_tags   = ["${var.network_name}-web"]
-
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["80","443"]
-        }
-      ]
-    }
-  ]
+  app_name     = "qa-blog"
+  network_name = "qa"
 }
 
-data "google_compute_image" "ubuntu" {
-  most_recent = true
-  project     = var.image_project 
-  family      = var.image_family
+module "staging" {
+  source = "./modules/blog"
+
+  project_id = var.project_id
+  region     = var.region
+
+  app_name     = "staging-blog"
+  network_name = "staging"
 }
 
-resource "google_compute_instance" "blog" {
-  name         = var.app_name
-  machine_type = var.machine_type
+module "prod" {
+  source = "./modules/blog"
 
-  tags = ["${var.network_name}-web"]
+  project_id = var.project_id
+  region     = var.region
 
-  boot_disk {
-    initialize_params {
-      image = data.google_compute_image.ubuntu.self_link
-    }
-  }
-  network_interface {
-   subnetwork = module.app_network.subnets_names[0]
-   access_config {
-      # Leave empty for dynamic public IP
-    }
-  }  
-
-  metadata_startup_script = "apt -y update; apt -y install nginx; echo ${var.app_name} > /var/www/html/index.html"
-  allow_stopping_for_update = true
+  app_name     = "prod-blog"
+  network_name = "prod"
 }
