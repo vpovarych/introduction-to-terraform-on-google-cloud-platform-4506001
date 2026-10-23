@@ -1,6 +1,6 @@
 variable "project_id" {
   type    = string
-  default = "lil-learning-terraform"
+  default = "terraform2026-512512"
 }
  
 variable "region" {
